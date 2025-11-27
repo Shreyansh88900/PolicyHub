@@ -1,153 +1,113 @@
- Insurance Policy and Management System Documentation (REST + Modern Frontend)
+
+🛡️ PolicyHub: Insurance Policy and Management System
+PolicyHub is a web-based insurance management system designed to streamline policy management, claim submission, review, and authorization processes. It utilizes a Client-Server Architecture with a RESTful API backend built on Spring Boot and a modern frontend using HTML/CSS/JS.
+
+✨ Features
+Policy Management: Policyholders can view, enroll in, and manage policies. Admins/Agents can manage (CRUD) policies.
+
+Claim Management: Users can submit claims and track their status. Admins/Adjusters/Agents can review and update claims.
 
 
-1. Project Description
-PolicyHub is a web-based  insurance management system designed to streamline policy management, claim submission, review, and auth processes. It allows policyholders to view, enroll, and manage policies, submit claims, and track their status. Admins, agents, and claim can manage policies and review claims.
+Role-Based Access Control: Distinct functionality is available for Policyholders, Admins, Agents, and Adjusters.
 
 
-2. System Architecture
-The project follows a Client-Server Architecture with a clear separation between the frontend (Client) and backend (Server), communicating entirely via RESTful APIs.
+User Authentication: Handles user login, registration, and session management with BCrypt password hashing.
 
 
-2.1 Backend (Server - Spring Boot)
-This layer provides the API endpoints, business logic, and database access.
-Module | Purpose | Key Components
-Auth | Handle user authentication, registration, profile, and session management. | User |entity, AuthController (handles login/logout/session), AuthService (BCrypt hashing).
-Policy | Manage insurance policies (CRUD) and handle user enrollment. | Policy entity, PolicyController, PolicyService.
-Claim | Submit, review, assign, and update insurance claims. | Claim entity, ClaimController, ClaimService.
+Document Handling: Support for uploading, viewing, and deleting claim-related documents.
 
 
+Support Tickets: Policyholders can create support tickets, which Admins/Adjusters/Agents can resolve.
 
-2.2 Frontend (Client - HTML/CSS/JS)
-This layer handles the user interface and interacts with the backend via asynchronous JavaScript calls.
-Technology | Purpose in Project
-HTML5 / CSS3 | Defines the structure and presentation of the application.
-Bootstrap | Provides a responsive, mobile-first design framework and standardized UI components.
-JavaScript (JS) | Executes all client-side logic, data manipulation, and event handling.
-jQuery | Simplifies DOM traversal, manipulation, and AJAX (Asynchronous JavaScript and XML) calls for REST communication.
-REST/AJAX | Mechanism used by JS/jQuery to send and receive JSON data from the Spring Boot API.
+🏗️ Architecture and Technologies
+PolicyHub follows a Client-Server Architecture communicating via RESTful APIs.
 
+1. Backend (Server)
 
-3. Database Design & Configuration
-
-3.1 Database Overview
-Database Name: PolicyHub.
+Framework: Spring Boot.
 
 
-3.2 Database Tables and Columns
-Tables	Columns
-user	userId (PK), email, password, role, username
-policy	policyId (PK), coverageAmount, createdDate, policyNumber, policyStatus
-policy_enrollment	policyId (FK), userId (FK)
-claim	claimId (PK), claimAmount, claimDate, claimStatus, policyId (FK to policy), userId (FK to user)
+Purpose: Provides API endpoints, business logic, and database access.
+
+Key Modules:
 
 
-3.3 Relationships
-•	User <-> Policy: Many-to-many via policy_enrollment.
-•	User <-> Claim: Many-to-one — a user (policyholder) can have multiple claims.
-•	Claim <-> Policy: Many-to-one — multiple claims can belong to the same policy.
+Auth: Handles authentication, registration, and session.
 
 
-
-4. Modules, APIs, and Backend Functionality
-
-
-4.1 Authentication Module (Auth)
-Purpose: Handles user login, registration, logout, and profile management using HTTP Sessions/Cookies for stateful authentication after initial login.
-Notes: Passwords are stored using BCryptPasswordEncoder.
-Key Functions & Endpoints:
-HTTP Method	Endpoint	Function	Frontend Interaction
-GET	/auth/profile	showProfile	JS fetches user profile for dashboard personalization.
-POST	/auth/login	login	JS sends username/password and receives session cookie.
-POST	/auth/register	registerUser	JS sends customer/user JSON payload.
-GET	/auth/logout	logout	JS sends request to invalidate session.
+Policy: Manages policies and user enrollment.
 
 
-4.2 Policy Module
-Purpose: Allows admins to manage policies and users to view/enroll policies.
-PolicyController Endpoints:
+Claim: Manages claim submission, review, and assignment.
+
+
+Database: MySQL.
+
+
+Tables: user, policy, claim, and the junction table policy_enrollment.
+
+Relationships:
+
+
+User <-> Policy: Many-to-many via policy_enrollment.
+
+
+User <-> Claim: Many-to-one (a user can have multiple claims).
+
+
+Claim <-> Policy: Many-to-one (multiple claims can belong to the same policy).
+
+2. Frontend (Client)
+
+Technologies: HTML5/CSS3, JavaScript (JS).
+
+
+Frameworks/Libraries: Bootstrap (responsive design) and jQuery (DOM manipulation, AJAX).
+
+
+Interaction: Uses AJAX/REST for all communication (sending and receiving JSON data) with the Spring Boot API.
+
+
+Design: Provides an SPA-like experience through dynamic content manipulation.
+
+⚙️ Setup and Execution Guide
+1. Database Setup
+
+Create Database: Create a MySQL database named PolicyHub.
+
+SQL
+CREATE DATABASE PolicyHub;
+
+Import Schema: Import the provided SQL dump file (MySQL_Dump.sql) to create the necessary tables (user, policy, claim, etc.).
+
+2. Backend Configuration
+Open the application.properties file.
+
+Ensure the database properties match your local MySQL setup: | Property | Example Value | | :--- | :--- | | server.port | 8082 | | spring.datasource.url | jdbc:mysql://localhost:3306/PolicyHub?createDatabaseIfNotExist=true | | spring.datasource.username | root | | spring.datasource.password | Ram54321@ |
+
+
+Run the Application: Start the Spring Boot application. The API endpoints will be available at http://localhost:8082/api.
+
+3. Frontend Access
+Open the index.html file in your web browser.
+
+Use the Login/Register forms (powered by Bootstrap Modals) to begin using the system.
+
+🚪 Key API Endpoints (Auth Module)
 HTTP Method	Endpoint	Function	Role
-POST	/policies/create	createPolicySubmit	Admin
-POST	/policies/update/{policyId}	updatePolicy	Admin
-DELETE	/policies/delete/{policyId}	deletePolicy	Admin
-GET	/policies/view	viewPolicies	All
-GET	/policies/my-policies	myPolicies	Policyholder
-POST	/policies/enroll/{policyId}	enrollPolicy	Policyholder
+POST	/auth/login	
+Log in and receive a session cookie 
 
+All
+POST	/auth/register	
+Register a new customer/user 
 
-4.3 Claim Module
-Purpose: Handles submission, review, and management of insurance claims.
-Notes: Validations ensure claim amount is within policy coverage.
-ClaimController Endpoints:
-HTTP Method	Endpoint	Function	Role
-GET	/claims/my-claims	viewMyClaims	Policyholder
-POST	/claims/submit	submitClaim	Policyholder/Agent
-POST	/claims/{claimId}/status	updateClaimStatus	Adjuster/Admin
-GET	/claims/{claimId}	getClaimDetails	All
-GET	/claims/review	reviewClaims	Adjuster/Admin
+All
+GET	/auth/profile	
+Fetch user profile data 
 
+All
+GET	/auth/logout	
+Invalidate the session 
 
-4.4 Document Module
-Purpose: Handles upload, viewing, and deletion of claim-related documents.
-DocumentController Endpoints:
-HTTP Method	Endpoint	Function
-POST	/documents/upload	uploadDocument
-GET	/documents/view/{documentId}	getDocumentDetails
-POST	/documents/delete/{documentId}	deleteDocument
-
-
-4.5 Support Module
-Purpose: Manage user support tickets and admin resolution.
-SupportController Endpoints:
-HTTP Method	Endpoint	Function	Role
-POST	/support/create	createTicket	Policyholder
-GET	/support/admin	showAllTicketsForAdmin	Admin/Adjuster/Agent
-POST	/support/{ticketId}/resolve	resolveTicket	Admin/Adjuster/Agent
-GET	/support	showUserTickets	Policyholder
-
-
-5. Frontend Design and User Interface (HTML/CSS/JS/Bootstrap)
-The frontend is a Single Page Application (SPA)-like experience achieved through dynamically hiding and showing content sections using JavaScript, jQuery, and Bootstrap classes, all communicating with the REST API via AJAX.
-Page	Frontend Components	Data Interaction (JS/jQuery)
-index.html	Login/Register forms powered by Bootstrap Modals.	auth.js: Captures form data, sends AJAX POST to /auth/login or /auth/register, and handles successful redirection.
-customer-dashboard.html	Section navigation, dynamic tables (My Policies, Claims, Premiums), Profile display.	customer.js: Fetches data from multiple endpoints (e.g., /customers/policies, /customers/claims) and dynamically builds HTML table rows using received JSON arrays.
-admin-dashboard.html	Section navigation, dashboard statistics cards, Policies/Claims/Customers management tables.	admin.js: Executes an initial check via /auth/current for ADMIN role. Uses AJAX GET, POST, PUT, DELETE calls for all CRUD operations on policy and claim data.
-
-
-6. Project Setup and Execution Guide
-
-
-6.1 Database Configuration
-1.	Create a new MySQL database: CREATE DATABASE PolicyHub;
-2.	Import the provided SQL dump (MySQL_Dump.sql).
-3.	Verify the database tables (user, policy, claim, etc.) are created.
-
-
-6.2 Configure application.properties
-Ensure the following configurations match your environment:
-Property	Value
-server.port	8082
-spring.datasource.url	jdbc:mysql://localhost:3306/PolicyHub?createDatabaseIfNotExist=true
-spring.datasource.username	root
-spring.datasource.password	Ram54321@
-spring.jpa.hibernate.ddl-auto	update
-
-
-6.3 Building and Running the Application
-1.	Start the Spring Boot backend application.
-2.	Once started, the API endpoints are available on http://localhost:8082/api.
-3.	Access the frontend by opening index.html in your web browser.
-
-
-7. Testing and Validation
-Testing was primarily manual and integration-focused, validating the end-to-end functionality from the browser UI through the REST layer to the database.
-Key Test Scenarios Covered:
-Test Case	Result
-User registration and login	✅ Passed
-Policy creation and enrollment	✅ Passed
-Claim submission 	✅ Passed
-Logout and session expiry	✅ Passed
-
-
-8. Conclusion
-The Insurance Management System (PolicyHub) successfully demonstrates a decoupled full-stack implementation using Spring Boot (REST API) and a HTML/CSS/JavaScript/jQuery frontend. This modular design ensures efficient data handling, role-based access control, and a scalable architecture.
+All
